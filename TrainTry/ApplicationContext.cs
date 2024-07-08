@@ -8,13 +8,11 @@ namespace TrainTry
         public DbSet<User> Users { get; set; }
         public DbSet<News> News { get; set; }
         public DbSet<MemorableDates> MemorableDates { get; set; }
-        public ApplicationContext()
+
+        public ApplicationContext(DbContextOptions<ApplicationContext> options)
+            : base(options)
         {
             Database.EnsureCreated();
-        }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=TrainTry;Username=postgres;Password=9001");
         }
     }
 }

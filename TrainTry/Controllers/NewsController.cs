@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TrainTry.Controllers
 {
@@ -7,41 +10,42 @@ namespace TrainTry.Controllers
     [ApiController]
     public class NewsController : ControllerBase
     {
+        private readonly ApplicationContext _context;
+
+        public NewsController(ApplicationContext context)
+        {
+            _context = context;
+        }
 
         [HttpPut(Name = "PutNews")]
-        public News PutNews(int id, DateTime dateBegin, DateTime dateEnd, string topic, string article, int importance, DateTime datePublish, string author)
+        public ActionResult<News> PutNews(int id, DateTime dateBegin, DateTime dateEnd, string topic, string article, int importance, DateTime datePublish, string author)
         {
             dateBegin = DateTime.SpecifyKind(dateBegin, DateTimeKind.Utc);
             dateEnd = DateTime.SpecifyKind(dateEnd, DateTimeKind.Utc);
             datePublish = DateTime.SpecifyKind(datePublish, DateTimeKind.Utc);
 
-            using (ApplicationContext db = new ApplicationContext())
+            News news = new News
             {
-                News news = new News
-                {
-                    id = id,
-                    dateBegin = dateBegin,
-                    dateEnd = dateEnd,
-                    topic = topic,
-                    article = article,
-                    importance = importance,
-                    datePublish = DateTime.UtcNow,
-                    author = author
-                };
-                db.News.Add(news);
-                db.SaveChanges();
-                return news;
-            }
+                id = id,
+                dateBegin = dateBegin,
+                dateEnd = dateEnd,
+                topic = topic,
+                article = article,
+                importance = importance,
+                datePublish = DateTime.UtcNow,
+                author = author
+            };
+
+            _context.News.Add(news);
+            _context.SaveChanges();
+            return news;
         }
 
         [HttpGet(Name = "GetNews")]
-        public List<News> GetNews()
+        public ActionResult<List<News>> GetNews()
         {
-            using (ApplicationContext db = new ApplicationContext())
-            {
-                var news = db.News.ToList();
-                return news;
-            }
+            var news = _context.News.ToList();
+            return news;
         }
     }
 }
