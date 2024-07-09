@@ -18,15 +18,14 @@ namespace TrainTry.Controllers
             _context = context;
         }
 
-        [HttpPut(Name = "PutNews")]
-        public async void PutNews(int id, DateTime dateBegin, DateTime dateEnd, string topic, string article, int importance, string author)
+        [HttpPut("PutNews", Name = "PutNews")]
+        public async Task<IActionResult> PutNews(DateTime dateBegin, DateTime dateEnd, string topic, string article, int importance, string author)
         {
             dateBegin = DateTime.SpecifyKind(dateBegin, DateTimeKind.Utc);
             dateEnd = DateTime.SpecifyKind(dateEnd, DateTimeKind.Utc);
 
             News news = new News
             {
-                id = id,
                 dateBegin = dateBegin,
                 dateEnd = dateEnd,
                 topic = topic,
@@ -37,26 +36,31 @@ namespace TrainTry.Controllers
             };
 
             _context.News.Add(news);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
+            return Ok(news);
         }
 
-        [HttpGet(Name = "GetNews")]
+        [HttpGet("GetNews", Name = "GetNews")]
         public async Task<ActionResult<List<News>>> GetNews()
         {
             var news = await _context.News.ToListAsync();
             return news;
         }
 
-        [HttpDelete(Name = "DeleteNews")]
-        public async void DeleteNews(int id)
+        [HttpDelete("DeleteNews", Name = "DeleteNews")]
+        public async Task<IActionResult> DeleteNews(int id)
         {
-            News news = new News
+            var news = await _context.News.FindAsync(id);
+            if (news == null)
             {
-                id = id
-            };
-            
+                return NotFound();
+            }
+
             _context.News.Remove(news);
             await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

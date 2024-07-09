@@ -93,7 +93,7 @@ app.Map("/login/{username}", (string username) =>
             issuer: AuthOptions.ISSUER,
             audience: AuthOptions.AUDIENCE,
             claims: claims,
-            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(2)), // время действия 2 минуты
+            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(60)), // время действия 2 минуты
             signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
 
     return new JwtSecurityTokenHandler().WriteToken(jwt);

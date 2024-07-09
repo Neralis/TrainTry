@@ -1,7 +1,12 @@
-﻿namespace TrainTry
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+
+namespace TrainTry
 {
     public class News
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int? id {get; set;}
         public DateTime dateBegin { get; set; }
         public DateTime dateEnd { get; set; }
