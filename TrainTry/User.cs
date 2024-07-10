@@ -7,5 +7,10 @@
         public string Password { get; set; }
 
         public string AccessRole {  get; set; }
+
+        public User() 
+        { 
+            AccessRole = "reader";
+        }
     }
 }
