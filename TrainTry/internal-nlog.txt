@@ -1,0 +1,4 @@
+2024-07-11 15:33:42.4023 Warn Flush completed with errors Exception: System.TimeoutException: Timeout when flushing all targets, after waiting 1,5 seconds.
+2024-07-11 15:33:42.4023 Warn Target flush timeout. One or more targets did not complete flush operation, skipping target close.
+2024-07-11 15:56:33.9512 Warn Flush completed with errors Exception: System.TimeoutException: Timeout when flushing all targets, after waiting 1,5 seconds.
+2024-07-11 15:56:33.9537 Warn Target flush timeout. One or more targets did not complete flush operation, skipping target close.

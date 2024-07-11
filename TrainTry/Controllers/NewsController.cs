@@ -24,9 +24,6 @@ namespace TrainTry.Controllers
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> PutNews(DateTime dateBegin, DateTime dateEnd, string topic, string article, int importance, string author)
         {
-            dateBegin = DateTime.SpecifyKind(dateBegin, DateTimeKind.Utc);
-            dateEnd = DateTime.SpecifyKind(dateEnd, DateTimeKind.Utc);
-
             News news = new News
             {
                 dateBegin = dateBegin,
@@ -34,7 +31,7 @@ namespace TrainTry.Controllers
                 topic = topic,
                 article = article,
                 importance = importance,
-                datePublish = DateTime.UtcNow,
+                datePublish = DateTime.Now,
                 author = author
             };
 
