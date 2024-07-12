@@ -1,12 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace TrainTry.Controllers
 {
@@ -30,7 +24,7 @@ namespace TrainTry.Controllers
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> PutNews(DateTime dateBegin, DateTime dateEnd, string topic, string article, int importance, string author)
         {
-            
+
             _logger.LogInformation("Попытка создать новость '{article}'", article);
 
             News news = new News
@@ -75,11 +69,48 @@ namespace TrainTry.Controllers
                 _logger.LogInformation("Попытка получить все новости завершилась успешно");
                 return news;
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при получении новостей");
                 return StatusCode(500, "Ошибка при получении новостей");
             }
+        }
+
+        #endregion
+
+        #region [Выборка новостей за определенную дату]
+
+        [HttpGet("GetNewsBySingleDate", Name = "GetNewsBySingleDate")]
+        [AllowAnonymous]
+        public async Task<ActionResult<Combine>> GetNewsBySingleDate(DateTime date)
+        {
+
+            date = date.Date; // Удаление времени, оставляя только дату
+
+            // Фильтрация новостей за дату
+            var news = await _context.News
+                .Where(n => n.dateBegin.Date <= date && date <= n.dateEnd.Date)
+                .ToListAsync();
+
+            var memodates = await _context.MemorableDates
+                .Where(s => s.EventDate.Date == date)
+                .Select(s => s.NotificationText)
+                .ToListAsync();
+
+            var combine = new Combine
+            {
+                News = news,
+                MemorableDates = memodates,
+            };
+
+            _logger.LogInformation("Новости за дату получены успешно");
+            return Ok(combine); // Используем Ok для возврата успешного результата
+        }
+
+        public class Combine
+        {
+            public List<News> News { get; set; }
+            public List<string> MemorableDates { get; set; }
         }
 
         #endregion
@@ -90,6 +121,9 @@ namespace TrainTry.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<List<News>>> GetNewsByDate(DateTime startDate, DateTime endDate)
         {
+            startDate = startDate.Date;
+            endDate = endDate.Date;
+
             if (startDate > endDate)
             {
                 _logger.LogInformation("Неверно введен диапазон даты (Дата начала не может быть позже даты окончания)");
