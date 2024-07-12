@@ -15,14 +15,14 @@ namespace TrainTry.Controllers
         private readonly ApplicationContext _context;
         private readonly ILogger<AccountController> _logger;
 
-
-
         public AccountController(ApplicationContext context, ILogger<AccountController> logger)
         {
             _context = context;
             _logger = logger;
             _logger.LogDebug(1, "NLog внедрен в AccountController");
         }
+
+        #region [Регистрация]
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(string login, string password)
@@ -44,6 +44,10 @@ namespace TrainTry.Controllers
             return Ok("Регистрация пройдена успешно.");
         }
 
+        #endregion
+
+        #region [Логин]
+
         [HttpPost("login")]
         public IActionResult Login(string login, string password)
         {
@@ -53,7 +57,7 @@ namespace TrainTry.Controllers
             var existingUser = _context.Users.SingleOrDefault(u => u.Login == login && u.Password == password);
             if (existingUser == null)
             {
-                _logger.LogWarning("Неудачная попытка входа: {Login}", login);
+                _logger.LogWarning("Неудачная попытка входа с логином: {Login}", login);
                 return Unauthorized("Неверные данные.");
             }
 
@@ -77,6 +81,10 @@ namespace TrainTry.Controllers
             return Ok(new { Token = token });
         }
 
+        #endregion
+
+        #region [Выдача роли]
+
         [HttpPost("setRole")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> SetRole(string login, string role)
@@ -98,6 +106,29 @@ namespace TrainTry.Controllers
             return Ok("Роль выдана успешно.");
         }
 
+        #endregion
+
+        #region [Удаление пользователей]
+
+        [HttpDelete("DeleteUser", Name = "DeleteUser")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                _logger.LogWarning("Попытка удалить несуществующего пользователя с id '{id}'", id);
+                return NotFound();
+            }
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Пользователь с id '{id}' успешно удален", id);
+            return NoContent();
+        }
+
+        #endregion
     }
 
 

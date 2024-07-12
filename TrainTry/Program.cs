@@ -16,7 +16,6 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    
     builder.Host.UseNLog();
 
     AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -96,7 +95,6 @@ try
 
 
 
-
     app.Map("/login/{username}", (string username) =>
     {
         var claims = new List<Claim> { new Claim(ClaimTypes.Name, username) };
@@ -120,7 +118,7 @@ try
 catch (Exception exception)
 {
     // NLog: catch setup errors
-    logger.Error(exception, "Stopped program because of exception");
+    logger.Error(exception, "Вызвано исключение во время выполнения программы");
     //throw;
 }
 finally
