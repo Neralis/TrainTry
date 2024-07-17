@@ -7,7 +7,7 @@ using NLog;
 using NLog.Web;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using TrainTry;
+using TrainTry.Configuration;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 logger.Debug("init main");

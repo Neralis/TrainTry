@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using TrainTry.Models;
 
-namespace TrainTry
+namespace TrainTry.Configuration
 {
     public class ApplicationContext : DbContext
     {

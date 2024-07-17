@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TrainTry.Configuration;
+using TrainTry.Models;
 
 namespace TrainTry.Controllers
 {

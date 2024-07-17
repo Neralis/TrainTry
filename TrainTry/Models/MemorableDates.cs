@@ -1,4 +1,4 @@
-﻿namespace TrainTry
+﻿namespace TrainTry.Models
 {
     public class MemorableDates
     {
