@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using TrainTry.Configuration;
+using TrainTry.Models;
 
 namespace TrainTry.Controllers
 {

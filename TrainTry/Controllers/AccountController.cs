@@ -4,6 +4,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.Extensions.Logging;
+using TrainTry.Configuration;
+using TrainTry.Models;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace TrainTry.Controllers
 {
@@ -104,6 +108,36 @@ namespace TrainTry.Controllers
 
             _logger.LogInformation("Роль {Role} установлена для пользователя: {Login}", role, login);
             return Ok("Роль выдана успешно.");
+        }
+
+        #endregion
+
+        #region [Получение списка пользователей]
+
+        [HttpGet("GetUsers", Name = "GetUsers")]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult<List<User>>> GetUsers()
+        {
+            _logger.LogInformation("Попытка получить список пользователей");
+
+            try
+            {
+                var users = await _context.Users.ToListAsync();
+                var userDtos = users.Select(u => new User
+                {
+                    Id = u.Id,
+                    Login = u.Login,
+                    AccessRole = u.AccessRole
+                }).ToList();
+
+                _logger.LogInformation("Попытка получить всех пользователей завершилась успешно");
+                return userDtos;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении пользователей");
+                return StatusCode(500, "Ошибка при получении пользователей");
+            }
         }
 
         #endregion
