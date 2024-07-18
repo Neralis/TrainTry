@@ -8,6 +8,8 @@ using TrainTry.Models;
 
 namespace TrainTry.Controllers
 {
+    [Route("[controller]")]
+    [ApiController]
     public class MemorableDatesController : Controller
     {
         private readonly ApplicationContext _context;
