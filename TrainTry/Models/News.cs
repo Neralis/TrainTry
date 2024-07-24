@@ -16,4 +16,5 @@ namespace TrainTry.Models
         public DateTime datePublish { get; set; }
         public string? author { get; set; }
     }
+    
 }

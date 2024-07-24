@@ -24,18 +24,18 @@ namespace TrainTry.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(string login, string password)
+        public async Task<IActionResult> Register([FromBody]UserRegAndLogin user)
         {
-            var result = await _accountService.Register(login, password);
+            var result = await _accountService.Register(user.Login, user.Password);
             if (result == "Пользователь с таким логином уже существует.")
                 return BadRequest(result);
             return Ok(result);
         }
 
         [HttpPost("login")]
-        public IActionResult Login(string login, string password)
+        public IActionResult Login([FromBody]UserRegAndLogin user)
         {
-            var token = _accountService.Login(login, password);
+            var token = _accountService.Login(user.Login, user.Password);
             if (token == "Неверные данные.")
                 return Unauthorized(token);
             return Ok(new { Token = token });
@@ -43,9 +43,9 @@ namespace TrainTry.Controllers
 
         [HttpPost("setRole")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> SetRole(string login, string role)
+        public async Task<IActionResult> SetRole([FromBody]UserSetRole user)
         {
-            var result = await _accountService.SetRole(login, role);
+            var result = await _accountService.SetRole(user.Login, user.AccessRole);
             if (result == "Пользователь не найден.")
                 return NotFound(result);
             return Ok(result);
