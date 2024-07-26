@@ -5,6 +5,7 @@ using System.Security.Claims;
 using TrainTry.Configuration;
 using TrainTry.Interfaces;
 using TrainTry.Models;
+using System.Text.RegularExpressions;
 
 namespace TrainTry.Services
 {
@@ -19,9 +20,21 @@ namespace TrainTry.Services
             _logger = logger;
         }
 
+        private bool ContainsUnicode(string input)
+        {
+            // Проверка на наличие символов, не являющихся ASCII
+            return input.Any(c => c > 127);
+        }
+
         public async Task<string> Register(string login, string password)
         {
             _logger.LogInformation("Попытка регистрации с логином: {Login}", login);
+
+            if (ContainsUnicode(login) || ContainsUnicode(password))
+            {
+                _logger.LogWarning("Регистрация с логином {Login} не удалась из-за недопустимых символов", login);
+                return "Логин и пароль не могут содержать символы Юникода.";
+            }
 
             if (_context.Users.Any(u => u.Login == login))
             {
@@ -41,6 +54,12 @@ namespace TrainTry.Services
         public string Login(string login, string password)
         {
             _logger.LogInformation("Попытка входа с логином: {Login}", login);
+
+            if (ContainsUnicode(login) || ContainsUnicode(password))
+            {
+                _logger.LogWarning("Вход с логином {Login} не удался из-за недопустимых символов", login);
+                return "Логин и пароль не могут содержать символы Юникода.";
+            }
 
             var existingUser = _context.Users.SingleOrDefault(u => u.Login == login && u.Password == password);
             if (existingUser == null)

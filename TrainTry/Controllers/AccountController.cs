@@ -27,8 +27,14 @@ namespace TrainTry.Controllers
         public async Task<IActionResult> Register([FromBody]UserRegAndLogin user)
         {
             var result = await _accountService.Register(user.Login, user.Password);
-            if (result == "Пользователь с таким логином уже существует.")
+            if (result == "Логин и пароль не могут содержать символы Юникода.")
+            {
                 return BadRequest(result);
+            }
+            if (result == "Пользователь с таким логином уже существует.")
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
@@ -36,8 +42,14 @@ namespace TrainTry.Controllers
         public IActionResult Login([FromBody]UserRegAndLogin user)
         {
             var token = _accountService.Login(user.Login, user.Password);
+            if (token == "Логин и пароль не могут содержать символы Юникода.")
+            {
+                return BadRequest(new { token = token });
+            }
             if (token == "Неверные данные.")
+            {
                 return Unauthorized(token);
+            }
             return Ok(new { Token = token });
         }
 
