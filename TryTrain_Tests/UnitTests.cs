@@ -1,11 +1,5 @@
 ﻿using Microsoft.Playwright;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace UnitTests
 {
@@ -25,6 +19,10 @@ namespace UnitTests
                 IgnoreHTTPSErrors = true
             });
         }
+
+        // Тестирование памятных дат
+
+        // Тестирование методов удаления памятных дат
 
         #region [Тест удаления нулевого id]
 
@@ -195,6 +193,212 @@ namespace UnitTests
 
         #endregion
 
+        // Тестирование добавления даты
+
+        #region [Тест добавления даты с неправльным типом данных]
+
+        [Test]
+        public async Task PutMemorableDates_WrongValueType()
+        {
+            var token = await GetToken();
+
+            var response = await _request.PutAsync(url: "MemorableDates/PutMemorablesDates", new APIRequestContextOptions()
+            {
+                Headers = new Dictionary<string, string>
+                {
+                    { "Authorization", $"Bearer {token}" }
+                },
+                Params = new Dictionary<string, object>
+                {
+                    { "eventDate", "1111" },
+                    { "notificationText", "Test" },
+                    { "author", "TestUser" }
+                }
+            });
+
+            Console.WriteLine(response.Status);
+            Assert.AreEqual(400, response.Status);
+        }
+
+        #endregion
+
+        #region [Тест добавления корректной даты]
+
+        [Test]
+        public async Task PutMemorableDates_ValidDate()
+        {
+            var token = await GetToken();
+
+            var response = await _request.PutAsync(url: "MemorableDates/PutMemorablesDates", new APIRequestContextOptions()
+            {
+                Headers = new Dictionary<string, string>
+                {
+                    { "Authorization", $"Bearer {token}" }
+                },
+                Params = new Dictionary<string, object>
+                {
+                    { "eventDate", DateTime.UtcNow.ToString("yyyy-MM-dd") },
+                    { "notificationText", "Test Notification" },
+                    { "author", "TestUser" }
+                }
+            });
+
+            Console.WriteLine(response.Status);
+            Assert.AreEqual(200, response.Status);
+        }
+
+        #endregion
+
+        #region [Тест добавления даты без авторизации]
+
+        [Test]
+        public async Task PutMemorableDates_Unauthorized()
+        {
+            var response = await _request.PutAsync(url: "MemorableDates/PutMemorablesDates", new APIRequestContextOptions()
+            {
+                Params = new Dictionary<string, object>
+                {
+                    { "eventDate", DateTime.UtcNow.ToString("yyyy-MM-dd") },
+                    { "notificationText", "Test Notification" },
+                    { "author", "TestUser" }
+                }
+            });
+
+            Console.WriteLine(response.Status);
+            Assert.AreEqual(401, response.Status);
+        }
+
+        #endregion
+
+        #region [Тест добавления даты с отсутствующими полями]
+
+        [Test]
+        public async Task PutMemorableDates_MissingFields()
+        {
+            var token = await GetToken();
+
+            var response = await _request.PutAsync(url: "MemorableDates/PutMemorablesDates", new APIRequestContextOptions()
+            {
+                Headers = new Dictionary<string, string>
+                {
+                    { "Authorization", $"Bearer {token}" }
+                },
+                Params = new Dictionary<string, object>
+                {
+                    { "eventDate", DateTime.UtcNow.ToString("yyyy-MM-dd") }
+                    // Автор и название отсутствуют
+                }
+            }); 
+
+            Console.WriteLine(response.Status);
+            Assert.AreEqual(400, response.Status);
+        }
+
+        #endregion
+
+        #region [Тест добавления даты с null полями]
+
+        [Test]
+        public async Task PutMemorableDates_NullFields()
+        {
+            var token = await GetToken();
+
+            var response = await _request.PutAsync(url: "MemorableDates/PutMemorablesDates", new APIRequestContextOptions()
+            {
+                Headers = new Dictionary<string, string>
+                {
+                    { "Authorization", $"Bearer {token}" }
+                },
+                DataObject = new Dictionary<string, object>
+                {
+                    { "eventDate", null },
+                    { "notificationText", null },
+                    { "author", null }
+                }
+            });
+
+            Console.WriteLine(response.Status);
+            Assert.AreEqual(400, response.Status);
+        }
+
+        #endregion
+
+        // Тестирование получения даты
+
+        #region [Тест получения даты]
+
+        [Test]
+        public async Task GetMemorableDates_Success()
+        {
+            var response = await _request.GetAsync(url: "MemorableDates/GetMemorablesDates", new APIRequestContextOptions()
+            {
+                Params = new Dictionary<string, object>
+                {
+                    { "date", "01/01/2024" }
+                }
+            });
+
+            var data = await response.JsonAsync();
+
+            Console.WriteLine(data);
+            Console.WriteLine(response.Status);
+            Assert.AreEqual(200, response.Status);
+        }
+
+        #endregion
+
+        #region [Тест получения даты с неправильным форматом даты]
+
+        [Test]
+        public async Task GetMemorableDates_InvalidDateFormat()
+        {
+            var token = await GetToken();
+
+            var response = await _request.GetAsync(url: "MemorableDates/GetMemorablesDates", new APIRequestContextOptions()
+            {
+                Headers = new Dictionary<string, string>
+                {
+                    { "Authorization", $"Bearer {token}" }
+                },
+                Params = new Dictionary<string, object>
+                {
+                    { "date", "invalid-date" }
+                }
+            });
+
+            Console.WriteLine(response.Status);
+            Assert.AreEqual(400, response.Status);
+        }
+
+        #endregion
+
+        #region [Тест получения даты с null параметром даты]
+
+        [Test]
+        public async Task GetMemorableDates_NullDate()
+        {
+            var token = await GetToken();
+
+            var response = await _request.GetAsync(url: "MemorableDates/GetMemorablesDates", new APIRequestContextOptions()
+            {
+                Headers = new Dictionary<string, string>
+        {
+            { "Authorization", $"Bearer {token}" }
+        }
+                // No date parameter
+            });
+
+            var data = await response.JsonAsync();
+
+            Console.WriteLine(response.Status);
+            Console.WriteLine(data);
+
+            Assert.AreEqual(200, response.Status);
+            Assert.IsTrue(data.ToString() == "[]");
+        }
+
+        #endregion
+
         #region [Таск получения токена для тестов]
 
         private async Task<string?> GetToken()
@@ -220,5 +424,6 @@ namespace UnitTests
         }
 
         #endregion
+
     }
 }
