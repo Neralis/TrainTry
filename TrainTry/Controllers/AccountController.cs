@@ -8,6 +8,7 @@ using TrainTry.Configuration;
 using TrainTry.Models;
 using Microsoft.EntityFrameworkCore;
 using TrainTry.Interfaces;
+using TrainTry.Services;
 
 
 namespace TrainTry.Controllers
@@ -16,11 +17,12 @@ namespace TrainTry.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
+        HashFunction hashFunction;
         private readonly IAccountService _accountService;
 
         public AccountController(IAccountService accountService)
         {
-            _accountService = accountService;
+            _accountService = accountService; 
         }
 
         [HttpPost("register")]

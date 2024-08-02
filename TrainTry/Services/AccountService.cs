@@ -10,6 +10,7 @@ namespace TrainTry.Services
 {
     public class AccountService : IAccountService
     {
+        HashFunction hashFunction;
         private readonly ApplicationContext _context;
         private readonly ILogger<AccountService> _logger;
 
@@ -28,8 +29,13 @@ namespace TrainTry.Services
                 _logger.LogWarning("Пользователь с логином {Login} уже существует", login);
                 return "Пользователь с таким логином уже существует.";
             }
-
-            var user = new User { Login = login, Password = password };
+            var (encryptedPassword,iv) = HashFunction.EncryptPassword(password);
+            var user = new User
+            {
+                Login = login,
+                Password = encryptedPassword,
+                IV = iv
+            };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -42,8 +48,8 @@ namespace TrainTry.Services
         {
             _logger.LogInformation("Попытка входа с логином: {Login}", login);
 
-            var existingUser = _context.Users.SingleOrDefault(u => u.Login == login && u.Password == password);
-            if (existingUser == null)
+            var existingUser = _context.Users.SingleOrDefault(u => u.Login == login);
+            if (existingUser == null || !HashFunction.VerifyPassword(password, existingUser.Password, existingUser.IV))
             {
                 _logger.LogWarning("Неудачная попытка входа с логином: {Login}", login);
                 return "Неверные данные.";

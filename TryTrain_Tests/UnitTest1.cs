@@ -30,13 +30,13 @@ namespace TestControllers
 
             var registerData = new Dictionary<string, object>  // Обратите внимание на тип значений object
             {
-                { "login", "TestUser" },
+                { "login", "TestUser1" },
                 { "password", "9001" }
             };
 
             var response = await _request.PostAsync(url: "Account/register", new APIRequestContextOptions()
             {
-                Params = registerData
+                DataObject = registerData
             });
 
             Assert.AreEqual(200, response.Status, "Регистрация не удалась. Код ответа: " + response.Status);
@@ -53,13 +53,13 @@ namespace TestControllers
         {
             var loginData = new Dictionary<string, object>  // Обратите внимание на тип значений object
             {
-                { "login", "Neralis" },
-                { "password", "9001" }
+                { "login", "w" },
+                { "password", "w" }
             };
 
             var response = await _request.PostAsync(url: "Account/login", new APIRequestContextOptions()
             {
-                Params = loginData
+                DataObject = loginData
             });
 
             var responseBody = await response.TextAsync();
@@ -78,6 +78,36 @@ namespace TestControllers
             }
 
         }
+        [Test]
+        public async Task BadLoginTest()
+        {
+            var loginData = new Dictionary<string, object>  // Обратите внимание на тип значений object
+            {
+                { "login", "sd" },
+                { "password", "sd" }
+            };
+
+            var response = await _request.PostAsync(url: "Account/login", new APIRequestContextOptions()
+            {
+                DataObject = loginData
+            });
+
+            var responseBody = await response.TextAsync();
+
+            // Десериализация JSON тела ответа в объект (предполагаем, что токен находится в поле 'token')
+            var responseObject = JsonSerializer.Deserialize<Dictionary<string, object>>(responseBody);
+            if (responseObject != null && responseObject.ContainsKey("token"))
+            {
+                var token = responseObject["token"].ToString();
+                // Используйте 'token' для дальнейших проверок или действий
+                Console.WriteLine($"Полученный токен: {token}");
+            }
+            else
+            {
+                Assert.Fail("Неверные данные.");
+            }
+
+        }
 
         #endregion
 
@@ -90,13 +120,13 @@ namespace TestControllers
 
             var roleData = new Dictionary<string, object>
             {
-                { "login", "TestUser" },
-                { "role", "TestRole2" }
+                { "login", "we" },
+                { "role", "reader" }
             };
 
             var response = await _request.PostAsync(url: "Account/setRole", new APIRequestContextOptions()
             {
-                Params = roleData,
+                DataObject =  roleData,
                 Headers = new Dictionary<string, string>
                 {
                     {"Authorization", $"Bearer {token}" }
@@ -143,7 +173,7 @@ namespace TestControllers
             {
                 Params = new Dictionary<string, object>
                 {
-                    { "id", "10" } // <-------- ID пользователя для теста удаления
+                    { "id", "16" } // <-------- ID пользователя для теста удаления
                 },
                 Headers = new Dictionary<string, string>
                 {
@@ -155,6 +185,70 @@ namespace TestControllers
 
             Assert.AreEqual(204, response.Status);
         }
+        [Test]
+        public async Task DeleteUser1()
+        {
+            var token = await GetToken();
+
+            var response = await _request.DeleteAsync(url: "Account/DeleteUser", new APIRequestContextOptions()
+            {
+                Params = new Dictionary<string, object>
+                {
+                    { "id", "-1" } // <-------- ID пользователя для теста удаления
+                },
+                Headers = new Dictionary<string, string>
+                {
+                    { "Authorization", $"Bearer {token}" }
+                }
+            });
+
+            var data = response.JsonAsync();
+
+            Assert.AreEqual(404, response.Status);
+        }
+        [Test]
+        public async Task DeleteUser2()
+        {
+            var token = await GetToken();
+
+            var response = await _request.DeleteAsync(url: "Account/DeleteUser", new APIRequestContextOptions()
+            {
+                Params = new Dictionary<string, object>
+                {
+                    { "id", "0" } // <-------- ID пользователя для теста удаления
+                },
+                Headers = new Dictionary<string, string>
+                {
+                    { "Authorization", $"Bearer {token}" }
+                }
+            });
+
+            var data = response.JsonAsync();
+
+            Assert.AreEqual(404, response.Status);
+        }
+        [Test]
+        public async Task DeleteUser3()
+        {
+            var token = await GetToken();
+
+            var response = await _request.DeleteAsync(url: "Account/DeleteUser", new APIRequestContextOptions()
+            {
+                Params = new Dictionary<string, object>
+                {
+                    { "id", "99999999999999999999999999999999999" } // <-------- ID пользователя для теста удаления
+                },
+                Headers = new Dictionary<string, string>
+                {
+                    { "Authorization", $"Bearer {token}" }
+                }
+            });
+
+            var data = response.JsonAsync();
+
+            Assert.AreEqual(400, response.Status);
+        }
+
 
         #endregion
 
@@ -164,13 +258,13 @@ namespace TestControllers
         {
             var loginData = new Dictionary<string, object>  // Обратите внимание на тип значений object
             {
-                { "login", "Neralis" },
-                { "password", "9001" }
+                { "login", "s" },
+                { "password", "s" }
             };
 
             var response = await _request.PostAsync(url: "Account/login", new APIRequestContextOptions()
             {
-                Params = loginData
+                DataObject = loginData
             });
 
             var responseBody = await response.TextAsync();
@@ -219,7 +313,7 @@ namespace TestControllers
 
         #endregion
 
-        #region [Тест получения новостей за диапазон даты]
+            #region [Тест получения новостей за диапазон даты]
 
         [Test]
         public async Task GetNewsByDateTest()
@@ -332,8 +426,8 @@ namespace TestControllers
         {
             var loginData = new Dictionary<string, object>  // Обратите внимание на тип значений object
             {
-                { "login", "Neralis" },
-                { "password", "9001" }
+                { "login", "s" },
+                { "password", "s" }
             };
 
             var response = await _request.PostAsync(url: "Account/login", new APIRequestContextOptions()
@@ -386,7 +480,7 @@ namespace TestControllers
                 {
                     { "Authorization", $"Bearer {token}" }
                 },
-                Params = new Dictionary<string, object>
+                DataObject = new Dictionary<string, object>
                 {
                     { "eventDate", "01/01/2024" },
                     { "notificationText", "Happy New YEAR!!!!" },
@@ -411,9 +505,9 @@ namespace TestControllers
 
             var response = await _request.GetAsync(url: "MemorableDates/GetMemorablesDates", new APIRequestContextOptions()
             {
-                Params = new Dictionary<string, object>
+                DataObject = new Dictionary<string, object>
                 {
-                    { "date", "01/01/2024" }
+                    { "date", "25/07/2024" }
                 }
             });
 
@@ -438,13 +532,71 @@ namespace TestControllers
                 {
                     { "Authorization", $"Bearer {token}" }
                 },
-                Params = new Dictionary<string, object>
+                DataObject   = new Dictionary<string, object>
                 {
                     { "id", "5" }
                 }
             });
 
             Assert.AreEqual(204, response.Status);
+        }
+        [Test]
+        public async Task DeleteMemorableDateTest1()
+        {
+            var token = await GetToken();
+
+            var response = await _request.DeleteAsync(url: "MemorableDates/DeleteMemorablesDates", new APIRequestContextOptions()
+            {
+                Headers = new Dictionary<string, string>
+                {
+                    { "Authorization", $"Bearer {token}" }
+                },
+                DataObject = new Dictionary<string, object>
+                {
+                    { "id", "0" }
+                }
+            });
+
+            Assert.AreEqual(404, response.Status);
+        }
+        [Test]
+        public async Task DeleteMemorableDateTest2()
+        {
+            var token = await GetToken();
+
+            var response = await _request.DeleteAsync(url: "MemorableDates/DeleteMemorablesDates", new APIRequestContextOptions()
+            {
+                Headers = new Dictionary<string, string>
+                {
+                    { "Authorization", $"Bearer {token}" }
+                },
+                DataObject = new Dictionary<string, object>
+                {
+                    { "id", "-1" }
+                }
+            });
+
+            Assert.AreEqual(404, response.Status);
+        }
+
+        [Test]
+        public async Task DeleteMemorableDateTest3()
+        {
+            var token = await GetToken();
+
+            var response = await _request.DeleteAsync(url: "MemorableDates/DeleteMemorablesDates", new APIRequestContextOptions()
+            {
+                Headers = new Dictionary<string, string>
+                {
+                    { "Authorization", $"Bearer {token}" }
+                },
+                DataObject = new Dictionary<string, object>
+                {
+                    { "id", "999999999999999999999999999999" }
+                }
+            });
+
+            Assert.AreEqual(404, response.Status);
         }
 
         #endregion
@@ -455,13 +607,13 @@ namespace TestControllers
         {
             var loginData = new Dictionary<string, object>  // Обратите внимание на тип значений object
             {
-                { "login", "Neralis" },
-                { "password", "9001" }
+                { "login", "s" },
+                { "password", "s" }
             };
 
             var response = await _request.PostAsync(url: "Account/login", new APIRequestContextOptions()
             {
-                Params = loginData
+                DataObject = loginData
             });
 
             var responseBody = await response.TextAsync();
