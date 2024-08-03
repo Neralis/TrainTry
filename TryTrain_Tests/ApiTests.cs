@@ -31,8 +31,8 @@ namespace TestControllers
             {
                 DataObject = new
                 {
-                    login = "TestUser",
-                    password = "9001"
+                    login = "NewUser",
+                    password = "qwerty"
                 }
             });
 
@@ -88,8 +88,8 @@ namespace TestControllers
             {
                 DataObject = new
                 {
-                    login = "TestUser",
-                    accessRole = "TestRole2"
+                    login = "NewUser",
+                    accessRole = "NewUser"
                 },
                 Headers = new Dictionary<string, string>
                 {
@@ -137,7 +137,7 @@ namespace TestControllers
             {
                 Params = new Dictionary<string, object>
                 {
-                    { "id", "10" } // <-------- ID пользователя для теста удаления
+                    { "id", "21" } // <-------- ID пользователя для теста удаления
                 },
                 Headers = new Dictionary<string, string>
                 {
@@ -243,7 +243,7 @@ namespace TestControllers
         {
             var date = new Dictionary<string, object>
             {
-                { "date", "12/12/2005" }
+                { "date", "09/09/2009" }
             };
 
             var response = await _request.GetAsync(url: "News/GetNewsBySingleDate", new APIRequestContextOptions()
@@ -310,7 +310,7 @@ namespace TestControllers
                 },
                 Params = new Dictionary<string, object>
                 {
-                    { "id", "14" }
+                    { "id", "3" }
                 }
             });
 
@@ -432,7 +432,7 @@ namespace TestControllers
                 },
                 Params = new Dictionary<string, object>
                 {
-                    { "id", "6" }
+                    { "id", "4" }
                 }
             });
 

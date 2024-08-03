@@ -7,7 +7,7 @@
         public string Password { get; set; }
 
         public string AccessRole { get; set; }
-
+        public string IV { get; set; }
         public User()
         {
             AccessRole = "reader";
