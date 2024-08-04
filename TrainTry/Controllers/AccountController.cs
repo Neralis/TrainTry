@@ -7,163 +7,85 @@ using Microsoft.Extensions.Logging;
 using TrainTry.Configuration;
 using TrainTry.Models;
 using Microsoft.EntityFrameworkCore;
+using TrainTry.Interfaces;
 
 
 namespace TrainTry.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-
     public class AccountController : ControllerBase
     {
-        private readonly ApplicationContext _context;
-        private readonly ILogger<AccountController> _logger;
+        private readonly IAccountService _accountService;
 
-        public AccountController(ApplicationContext context, ILogger<AccountController> logger)
+        public AccountController(IAccountService accountService)
         {
-            _context = context;
-            _logger = logger;
-            _logger.LogDebug(1, "NLog внедрен в AccountController");
+            _accountService = accountService;
         }
-
-        #region [Регистрация]
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(string login, string password)
+        public async Task<IActionResult> Register([FromBody]UserRegAndLogin user)
         {
-            _logger.LogInformation("Попытка регистрации с логином: {Login}", login);
-
-            User user = new User { Login = login, Password = password };
-
-            if (_context.Users.Any(u => u.Login == login))
+            var result = await _accountService.Register(user.Login, user.Password);
+            if (result == "Логин и пароль не могут содержать символы Юникода.")
             {
-                _logger.LogWarning("Пользователь с логином {Login} уже существует", login);
-                return BadRequest("Пользователь с таким логином уже существует.");
+                return BadRequest(result);
             }
-
-            _logger.LogInformation("Пользователь {Login} загеристрирован успешно", login);
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return Ok("Регистрация пройдена успешно.");
+            if (result == "Пользователь с таким логином уже существует.")
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
         }
 
-        #endregion
-
-        #region [Логин]
-
         [HttpPost("login")]
-        public IActionResult Login(string login, string password)
+        public IActionResult Login([FromBody]UserRegAndLogin user)
         {
-
-            _logger.LogInformation("Попытка входа с логином: {Login}", login);
-
-            var existingUser = _context.Users.SingleOrDefault(u => u.Login == login && u.Password == password);
-            if (existingUser == null)
+            var token = _accountService.Login(user.Login, user.Password);
+            if (token == "Логин и пароль не могут содержать символы Юникода.")
             {
-                _logger.LogWarning("Неудачная попытка входа с логином: {Login}", login);
-                return Unauthorized("Неверные данные.");
+                return BadRequest(new { token = token });
             }
-
-            var claims = new List<Claim>
+            if (token == "Неверные данные.")
             {
-                new Claim(ClaimTypes.Name, existingUser.Login),
-                new Claim(ClaimTypes.Role, existingUser.AccessRole) // Добавляем роль в токен
-            };
-
-            var jwt = new JwtSecurityToken(
-                    issuer: AuthOptions.ISSUER,
-                    audience: AuthOptions.AUDIENCE,
-                    claims: claims,
-                    notBefore: DateTime.UtcNow,
-                    expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(60)),
-                    signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-
-            var token = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-            _logger.LogInformation("Пользователь {Login} вошел успешно", login);
+                return Unauthorized(token);
+            }
             return Ok(new { Token = token });
         }
 
-        #endregion
-
-        #region [Выдача роли]
-
         [HttpPost("setRole")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> SetRole(string login, string role)
+        public async Task<IActionResult> SetRole([FromBody]UserSetRole user)
         {
-
-            _logger.LogInformation("Попытка установить роль для логина: {Login} роль: {Role}", login, role);
-
-            var user = _context.Users.SingleOrDefault(u => u.Login == login);
-            if (user == null)
-            {
-                _logger.LogWarning("Пользователь с таким логином не найден: {Login}", login);
-                return NotFound("Пользователь не найден.");
-            }
-
-            user.AccessRole = role;
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation("Роль {Role} установлена для пользователя: {Login}", role, login);
-            return Ok("Роль выдана успешно.");
+            var result = await _accountService.SetRole(user.Login, user.AccessRole);
+            if (result == "Пользователь не найден.")
+                return NotFound(result);
+            return Ok(result);
         }
-
-        #endregion
-
-        #region [Получение списка пользователей]
 
         [HttpGet("GetUsers", Name = "GetUsers")]
         [Authorize(Roles = "admin")]
         public async Task<ActionResult<List<User>>> GetUsers()
         {
-            _logger.LogInformation("Попытка получить список пользователей");
-
-            try
-            {
-                var users = await _context.Users.ToListAsync();
-                var userDtos = users.Select(u => new User
-                {
-                    Id = u.Id,
-                    Login = u.Login,
-                    AccessRole = u.AccessRole
-                }).ToList();
-
-                _logger.LogInformation("Попытка получить всех пользователей завершилась успешно");
-                return userDtos;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при получении пользователей");
-                return StatusCode(500, "Ошибка при получении пользователей");
-            }
+            var users = await _accountService.GetUsers();
+            return Ok(users);
         }
-
-        #endregion
-
-        #region [Удаление пользователей]
 
         [HttpDelete("DeleteUser", Name = "DeleteUser")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            try
             {
-                _logger.LogWarning("Попытка удалить несуществующего пользователя с id '{id}'", id);
-                return NotFound();
+                await _accountService.DeleteUser(id);
+                return NoContent();
             }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation("Пользователь с id '{id}' успешно удален", id);
-            return NoContent();
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Пользователь не найден.");
+            }
         }
-
-        #endregion
     }
-
-
 }
+
+

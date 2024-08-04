@@ -8,6 +8,8 @@ using NLog.Web;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using TrainTry.Configuration;
+using TrainTry.Interfaces;
+using TrainTry.Services;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 logger.Debug("init main");
@@ -48,6 +50,9 @@ try
             };
         });
 
+    builder.Services.AddScoped<INewsService, NewsService>();
+    builder.Services.AddScoped<IAccountService, AccountService>();
+    builder.Services.AddScoped<IMemorableDatesService, MemorableDatesService>();
 
     builder.Services.AddControllers();
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
