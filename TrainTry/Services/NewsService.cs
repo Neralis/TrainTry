@@ -71,6 +71,7 @@ namespace TrainTry.Services
             // Фильтрация новостей за дату
             var news = await _context.News
                 .Where(n => n.dateBegin.Date <= date && date <= n.dateEnd.Date)
+                .OrderByDescending(n => n.importance)
                 .ToListAsync();
 
             var memodates = await _context.MemorableDates

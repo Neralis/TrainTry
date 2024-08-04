@@ -925,7 +925,7 @@ namespace UnitTests
                     { "dateEnd", "09/09/2009" },
                     { "topic", "Something" },
                     { "article", "dasdasdasdas" },
-                    { "importance", 3 },
+                    { "importance", 2 },
                     { "author", "TestUser" }
                 }
             });
